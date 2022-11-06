@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  surname      String
+  email        String        @unique
+  phoneNumber  Int           @unique
+  password     String
+  role         Role          @default(CUSTOMER)
+  ticket       Ticket?
+  subscription Subscription?
+}
+
+enum Role {
+  CUSTOMER
+  SYSTEM_ADMIN
+  BUS_DRIVER
+}
+
+model Line {
+  id                 String         @id @default(auto()) @map("_id") @db.ObjectId
+  departure          Station        @relation("departure_relation", fields: [departureStationId], references: [id])
+  departureStationId String         @db.ObjectId
+  arrive             Station        @relation("arrive_relation", fields: [arriveStationId], references: [id])
+  arriveStationId    String         @db.ObjectId
+  addedOn            DateTime       @default(now())
+  subscriptions      Subscription[]
+}
+
+model Station {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  label          String
+  location       Location @relation(fields: [locationId], references: [id])
+  locationId     String   @unique @db.ObjectId
+  departureLines Line[]   @relation("departure_relation")
+  arriveLines    Line[]   @relation("arrive_relation")
+}
+
+model Location {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  longitude Float
+  latitude  Float
+  station   Station?
+  Buses     Bus?
+}
+
+model Voyage {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  departureTime DateTime @default(now())
+  arriveTime    DateTime @default(now())
+  ticketPrice   Float
+  tickets       Ticket[]
+}
+
+model Bus {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  serieNumber    Int
+  busType        BusType
+  numberOfPlaces Int
+  state          String
+  location       Location @relation(fields: [locationId], references: [id])
+  locationId     String   @unique @db.ObjectId
+}
+
+type BusType {
+  label String
+}
+
+model Ticket {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  voyage     Voyage @relation(fields: [voyageId], references: [id])
+  voyageId   String @db.ObjectId
+  customer   User   @relation(fields: [customerId], references: [id])
+  customerId String @unique @db.ObjectId
+}
+
+model Subscription {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  line       Line   @relation(fields: [lineId], references: [id])
+  lineId     String @db.ObjectId
+  customer   User   @relation(fields: [customerId], references: [id])
+  customerId String @unique @db.ObjectId
+}
