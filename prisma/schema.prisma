@@ -30,6 +30,7 @@ enum Role {
 
 model Line {
   id                 String         @id @default(auto()) @map("_id") @db.ObjectId
+  label              String
   departure          Station        @relation("departure_relation", fields: [departureStationId], references: [id])
   departureStationId String         @db.ObjectId
   arrive             Station        @relation("arrive_relation", fields: [arriveStationId], references: [id])
