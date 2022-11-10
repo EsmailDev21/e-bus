@@ -42,12 +42,12 @@ export class LineService {
     const line = await this.findOne(id);
     const startStation = await this.prismaService.station.findFirst({
       where:{
-        departureLines:{every:{id:line.id}}
+        departureLines:{some:{id:line.id}}
       }
     })
     const arriveStation = await this.prismaService.station.findFirst({
       where:{
-        arriveLines:{every:{id:line.id}}
+        arriveLines:{some:{id:line.id}}
       }
     })
     const depLocation = await this.prismaService.location.findFirst({where:{station:{
