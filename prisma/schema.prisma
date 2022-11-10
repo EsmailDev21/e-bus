@@ -17,7 +17,8 @@ model User {
   email        String        @unique
   phoneNumber  Int           @unique
   password     String
-  role         Role          @default(CUSTOMER)
+  role         UserRole      @relation(fields: [roleId], references: [id])
+  roleId       String
   ticket       Ticket?
   subscription Subscription?
 }
@@ -26,6 +27,12 @@ enum Role {
   CUSTOMER
   SYSTEM_ADMIN
   BUS_DRIVER
+}
+
+model UserRole {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  value Role   @default(CUSTOMER)
+  users User[]
 }
 
 model Line {
@@ -62,6 +69,9 @@ model Voyage {
   arriveTime    DateTime @default(now())
   ticketPrice   Float
   tickets       Ticket[]
+  price         Float
+  busId         String
+  bus           Bus      @relation(fields: [busId], references: [id])
 }
 
 model Bus {
@@ -72,6 +82,7 @@ model Bus {
   state          String
   location       Location @relation(fields: [locationId], references: [id])
   locationId     String   @unique @db.ObjectId
+  voyages        Voyage[]
 }
 
 type BusType {
@@ -87,9 +98,12 @@ model Ticket {
 }
 
 model Subscription {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  line       Line   @relation(fields: [lineId], references: [id])
-  lineId     String @db.ObjectId
-  customer   User   @relation(fields: [customerId], references: [id])
-  customerId String @unique @db.ObjectId
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  line       Line     @relation(fields: [lineId], references: [id])
+  lineId     String   @db.ObjectId
+  customer   User     @relation(fields: [customerId], references: [id])
+  customerId String   @unique @db.ObjectId
+  isValid    Boolean
+  createdAt  DateTime @default(now())
+  endsAt     DateTime
 }

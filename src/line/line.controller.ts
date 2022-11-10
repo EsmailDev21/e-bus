@@ -23,6 +23,10 @@ export class LineController {
   async findOne(@Param('id') id: string) {
     return await this.lineService.findOne(id);
   }
+  @Get('/route/:id')
+  async getRoute(@Param('id') id: string) {
+    return await this.lineService.getRoute(id);
+  }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateLineDto: Partial<Line>) {
